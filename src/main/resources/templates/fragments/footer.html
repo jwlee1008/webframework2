@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="practiceFooter"
+        class="text-center small text-muted py-2 border-top bg-white"
+        style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030;">
+    <span id="practiceTime"
+          th:text="${'실습 수행 일시: ' + #temporals.format(#temporals.createNow(), 'yyyy년 MM월 dd일 HH:mm:ss')}">
+        실습 수행 일시
+    </span>
+    <span> | 학번: 2071146 | 성명: 이정환</span>
+
+    <script>
+        function pad(number) {
+            return String(number).padStart(2, '0');
+        }
+
+        function updatePracticeTime() {
+            const now = new Date();
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const hour = now.getHours();
+            const period = hour < 12 ? '오전' : '오후';
+            const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+            const text = '실습 수행 일시: '
+                + now.getFullYear() + '년 '
+                + pad(now.getMonth() + 1) + '월 '
+                + pad(now.getDate()) + '일 '
+                + '(' + days[now.getDay()] + ') '
+                + period + ' '
+                + pad(displayHour) + ':'
+                + pad(now.getMinutes()) + ':'
+                + pad(now.getSeconds());
+
+            document.getElementById('practiceTime').textContent = text;
+        }
+
+        updatePracticeTime();
+        setInterval(updatePracticeTime, 1000);
+    </script>
+</footer>
+</body>
+</html>

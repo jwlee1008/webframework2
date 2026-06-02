@@ -1,8 +1,12 @@
 package kr.ac.hansung.controller;
 
 import kr.ac.hansung.dto.ProductDto;
+import kr.ac.hansung.entity.Product;
 import kr.ac.hansung.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +19,15 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("products", productService.findAll());
+    public String list(@RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "5") int size,
+                       Model model) {
+        int pageNumber = Math.max(page, 0);
+        int pageSize = size > 0 ? size : 5;
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by("id").ascending());
+        Page<Product> productPage = productService.getProducts(pageRequest);
+
+        model.addAttribute("productPage", productPage);
         return "products/list";
     }
 

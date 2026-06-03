@@ -20,6 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -63,6 +64,21 @@ class ProductControllerTest {
             .andExpect(status().isOk())
             .andExpect(view().name("products/list"))
             .andExpect(model().attributeExists("productPage"));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    @DisplayName("인증된 사용자 - 상품 검색 시 keyword 유지")
+    void searchProducts_authenticated_returns200() throws Exception {
+        given(productService.searchProducts(eq("삼성전자"), any())).willReturn(new PageImpl<>(List.of(
+            new Product("삼성전자 갤럭시 S25", 1290000, "최신 플래그십 스마트폰", 100)
+        ), PageRequest.of(0, 5), 1));
+
+        mockMvc.perform(get("/products").param("keyword", "삼성전자"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("products/list"))
+            .andExpect(model().attributeExists("productPage"))
+            .andExpect(model().attribute("keyword", "삼성전자"));
     }
 
     @Test

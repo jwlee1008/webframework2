@@ -110,6 +110,29 @@ class ProductControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    @DisplayName("ADMIN - 상품 수정 폼 조회 성공 (200)")
+    void editForm_admin_returns200() throws Exception {
+        Product product = new Product("기존 상품", 10000, "기존 설명", 5);
+        product.setId(1L);
+        given(productService.findById(1L)).willReturn(product);
+
+        mockMvc.perform(get("/products/1/edit"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("products/edit"))
+            .andExpect(model().attributeExists("productDto"))
+            .andExpect(model().attribute("productId", 1L));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    @DisplayName("일반 USER - 상품 수정 폼 접근 시 403 (권한 없음)")
+    void editForm_user_returns403() throws Exception {
+        mockMvc.perform(get("/products/1/edit"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("ADMIN - 상품 등록 POST 후 목록으로 리다이렉트")
     void saveProduct_admin_redirectsToList() throws Exception {
         given(productService.save(any())).willReturn(
@@ -136,6 +159,39 @@ class ProductControllerTest {
                 .param("price", "15000")
                 .param("stock", "10"))
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("ADMIN - 상품 수정 POST 후 목록으로 리다이렉트")
+    void editProduct_admin_redirectsToList() throws Exception {
+        given(productService.updateProduct(eq(1L), any())).willReturn(
+            new Product("수정 상품", 20000, "수정 설명", 20)
+        );
+
+        mockMvc.perform(post("/products/1/edit")
+                .with(csrf())
+                .param("name", "수정 상품")
+                .param("price", "20000")
+                .param("description", "수정 설명")
+                .param("stock", "20"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/products"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("ADMIN - 상품 수정 검증 실패 시 수정 폼으로 복귀")
+    void editProduct_validationError_returnsEditForm() throws Exception {
+        mockMvc.perform(post("/products/1/edit")
+                .with(csrf())
+                .param("name", "")
+                .param("price", "20000")
+                .param("description", "수정 설명")
+                .param("stock", "20"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("products/edit"))
+            .andExpect(model().attribute("productId", 1L));
     }
 
     @Test

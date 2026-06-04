@@ -25,10 +25,12 @@ src/main/java/kr/ac/hansung/
 │   ├── AuthController.java            ← 로그인 폼 + 회원가입
 │   ├── HomeController.java            ← 홈 페이지
 │   ├── AdminController.java           ← 관리자 대시보드 (통계)
-│   └── ProductController.java         ← 상품 목록/등록/삭제
+│   ├── ProductController.java         ← 상품 목록/검색/등록/수정/삭제
+│   └── UserController.java            ← 비밀번호 변경
 ├── dto/
 │   ├── UserDto.java
-│   └── ProductDto.java
+│   ├── ProductDto.java
+│   └── PasswordChangeDto.java
 ├── entity/
 │   ├── User.java
 │   ├── Role.java
@@ -70,6 +72,8 @@ mvn spring-boot:run
 | http://localhost:8080/home | 홈 | 로그인 필요 |
 | http://localhost:8080/products | 상품 목록 | 로그인 필요 |
 | http://localhost:8080/products/add | 상품 등록 | ADMIN |
+| http://localhost:8080/products/{id}/edit | 상품 수정 | ADMIN |
+| http://localhost:8080/user/password | 비밀번호 변경 | 로그인 필요 |
 | http://localhost:8080/admin/dashboard | 관리자 대시보드 | ADMIN |
 
 ### 4. 초기 계정
@@ -98,8 +102,15 @@ mvn test
 | 테스트 클래스 | 테스트 수 | 설명 |
 |---|---|---|
 | `AuthControllerTest` | 5개 | 로그인/회원가입 흐름, CSRF |
-| `ProductControllerTest` | 7개 | 인증/인가 기반 상품 접근 제어 |
+| `ProductControllerTest` | 12개 | 상품 목록/검색/등록/수정/삭제, 권한 확인 |
+| `UserControllerTest` | 5개 | 비밀번호 변경 폼, 성공/오류 흐름 |
 | `HelloSpringSecurityApplicationTests` | 1개 | 컨텍스트 로드 확인 |
+
+## 제출용 스크린샷
+
+6단계 테스트 결과와 제출용 화면 캡처는 아래 문서에 정리했습니다.
+
+- [6단계 테스트 + 스크린샷 정리](docs/assignment6-test-and-screenshots.md)
 
 ## 핵심 개념
 
@@ -120,7 +131,7 @@ POST /login (email + password)
 |---|---|
 | `/`, `/login`, `/signup`, 정적 리소스 | 누구나 |
 | `/admin/**` | ROLE_ADMIN |
-| `/products/add`, `/products/*/delete` | ROLE_ADMIN |
+| `/products/add`, `/products/*/delete`, `/products/*/edit` | ROLE_ADMIN |
 | `POST /products` | ROLE_ADMIN |
 | 그 외 모든 요청 | 로그인 사용자 |
 
